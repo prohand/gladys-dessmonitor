@@ -6,6 +6,8 @@ All notable changes to this integration are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.0.1] - 2026-11-23
+
 ### Added
 
 - First version of the DessMonitor integration: the inverters of a DessMonitor / SmartESS account
@@ -25,4 +27,5 @@ All notable changes to this integration are documented here. The format follows
 - "Test the connection" button on the Configuration screen.
 - English, French, German and Spanish texts and documentation.
 
-[Unreleased]: https://github.com/prohand/gladys-dessmonitor/commits/main
+[Unreleased]: https://github.com/prohand/gladys-dessmonitor/compare/v0.0.1...HEAD
+[0.0.1]: https://github.com/prohand/gladys-dessmonitor/releases/tag/v0.0.1

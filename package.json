@@ -1,6 +1,6 @@
 {
   "name": "gladys-dessmonitor",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "private": true,
   "description": "Gladys Assistant external integration for solar inverters monitored on the DessMonitor cloud (Eybond / SmartESS dataloggers).",
   "type": "module",
