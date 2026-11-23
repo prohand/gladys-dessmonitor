@@ -1,0 +1,711 @@
+{
+  "manifest_version": 1,
+  "type": "device",
+  "name": "DessMonitor",
+  "description": {
+    "en": "Solar inverters and batteries monitored on the DessMonitor / SmartESS cloud.",
+    "fr": "Onduleurs solaires et batteries suivis sur le cloud DessMonitor / SmartESS.",
+    "de": "Solarwechselrichter und Batterien aus der DessMonitor/SmartESS-Cloud.",
+    "es": "Inversores solares y baterías supervisados en la nube DessMonitor / SmartESS."
+  },
+  "version": "0.0.0",
+  "docker_image": "ghcr.io/prohand/gladys-dessmonitor:0.0.0",
+  "gladys_version": ">=5.3.0",
+  "cover_image": "https://raw.githubusercontent.com/prohand/gladys-dessmonitor/main/cover.png",
+  "categories": ["energy"],
+  "keywords": [
+    "smartess",
+    "eybond",
+    "shinemonitor",
+    "onduleur",
+    "inverter",
+    "easun",
+    "powmr",
+    "mpp solar",
+    "off-grid",
+    "photovoltaïque"
+  ],
+  "transports": ["cloud"],
+  "config_schema": [
+    {
+      "key": "intro",
+      "type": "section",
+      "label": {
+        "en": "Getting started",
+        "fr": "Pour commencer",
+        "de": "Erste Schritte",
+        "es": "Primeros pasos"
+      },
+      "description": {
+        "en": "This integration reads your inverters from the DessMonitor cloud (the same account as the DessMonitor or SmartESS app). Enter that account below: the inverters then show up in the Discovery tab. Nothing to install on your network.",
+        "fr": "Cette intégration lit vos onduleurs depuis le cloud DessMonitor (le même compte que l’application DessMonitor ou SmartESS). Saisissez ce compte ci-dessous : les onduleurs apparaissent ensuite dans l’onglet Découverte. Rien à installer sur votre réseau.",
+        "de": "Diese Integration liest deine Wechselrichter aus der DessMonitor-Cloud (dasselbe Konto wie in der App DessMonitor oder SmartESS). Gib dieses Konto unten ein: Die Wechselrichter erscheinen dann im Reiter Erkennung. Im Netzwerk ist nichts zu installieren.",
+        "es": "Esta integración lee sus inversores desde la nube DessMonitor (la misma cuenta que la aplicación DessMonitor o SmartESS). Introduzca esa cuenta abajo: los inversores aparecen luego en la pestaña Descubrimiento. No hay nada que instalar en su red."
+      },
+      "links": [
+        {
+          "url": "https://www.dessmonitor.com",
+          "label": {
+            "en": "DessMonitor website",
+            "fr": "Site DessMonitor",
+            "de": "DessMonitor-Website",
+            "es": "Sitio de DessMonitor"
+          }
+        }
+      ]
+    },
+    {
+      "key": "username",
+      "type": "string",
+      "label": {
+        "en": "Username",
+        "fr": "Identifiant",
+        "de": "Benutzername",
+        "es": "Usuario"
+      },
+      "description": {
+        "en": "The username of your DessMonitor / SmartESS account.",
+        "fr": "L’identifiant de votre compte DessMonitor / SmartESS.",
+        "de": "Der Benutzername deines DessMonitor/SmartESS-Kontos.",
+        "es": "El usuario de su cuenta DessMonitor / SmartESS."
+      },
+      "placeholder": {
+        "en": "e.g. john.doe",
+        "fr": "ex. jean.dupont",
+        "de": "z. B. max.mustermann",
+        "es": "p. ej. juan.perez"
+      },
+      "required": true
+    },
+    {
+      "key": "password",
+      "type": "secret",
+      "label": {
+        "en": "Password",
+        "fr": "Mot de passe",
+        "de": "Passwort",
+        "es": "Contraseña"
+      },
+      "description": {
+        "en": "Stored by Gladys, never written in the logs.",
+        "fr": "Conservé par Gladys, jamais écrit dans les logs.",
+        "de": "Von Gladys gespeichert, nie in die Logs geschrieben.",
+        "es": "Guardada por Gladys, nunca escrita en los registros."
+      },
+      "required": true
+    },
+    {
+      "key": "company_key",
+      "type": "string",
+      "label": {
+        "en": "Company key",
+        "fr": "Clé fabricant",
+        "de": "Herstellerschlüssel",
+        "es": "Clave de fabricante"
+      },
+      "description": {
+        "en": "Leave the default value unless your installer gave you another one.",
+        "fr": "Laissez la valeur par défaut, sauf si votre installateur vous en a donné une autre.",
+        "de": "Behalte den Standardwert, außer dein Installateur hat dir einen anderen gegeben.",
+        "es": "Deje el valor por defecto, salvo si su instalador le dio otra."
+      },
+      "required": false,
+      "default": "bnrl_frRFjEz8Mkn"
+    },
+    {
+      "key": "poll_frequency",
+      "type": "number",
+      "label": {
+        "en": "Refresh interval (s)",
+        "fr": "Intervalle de rafraîchissement (s)",
+        "de": "Aktualisierungsintervall (s)",
+        "es": "Intervalo de actualización (s)"
+      },
+      "description": {
+        "en": "How often each inverter is read, in seconds (60 to 3600). DessMonitor itself refreshes every 5 minutes.",
+        "fr": "Fréquence de lecture de chaque onduleur, en secondes (60 à 3600). DessMonitor se met lui-même à jour toutes les 5 minutes.",
+        "de": "Wie oft jeder Wechselrichter gelesen wird, in Sekunden (60 bis 3600). DessMonitor selbst aktualisiert alle 5 Minuten.",
+        "es": "Cada cuánto se lee cada inversor, en segundos (60 a 3600). DessMonitor se actualiza cada 5 minutos."
+      },
+      "required": false,
+      "default": 300,
+      "min": 60,
+      "max": 3600
+    },
+    {
+      "key": "allow_control",
+      "type": "boolean",
+      "label": {
+        "en": "Allow changing inverter settings",
+        "fr": "Autoriser la modification des réglages",
+        "de": "Ändern der Einstellungen erlauben",
+        "es": "Permitir cambiar los ajustes"
+      },
+      "description": {
+        "en": "Lets scenes and the widget change the output and charger priority through DessMonitor. Off by default.",
+        "fr": "Permet aux scènes et au widget de changer la priorité de sortie et de charge via DessMonitor. Désactivé par défaut.",
+        "de": "Erlaubt Szenen und dem Widget, Ausgangs- und Ladepriorität über DessMonitor zu ändern. Standardmäßig aus.",
+        "es": "Permite a las escenas y al widget cambiar la prioridad de salida y de carga vía DessMonitor. Desactivado por defecto."
+      },
+      "required": false,
+      "default": false
+    }
+  ],
+  "actions": [
+    {
+      "key": "test_connection",
+      "label": {
+        "en": "Test the connection",
+        "fr": "Tester la connexion",
+        "de": "Verbindung testen",
+        "es": "Probar la conexión"
+      },
+      "timeout_seconds": 60
+    }
+  ],
+  "widgets": [
+    {
+      "key": "inverter",
+      "label": {
+        "en": "Solar inverter",
+        "fr": "Onduleur solaire",
+        "de": "Solarwechselrichter",
+        "es": "Inversor solar"
+      },
+      "description": {
+        "en": "Battery, solar, load and grid of an inverter, with its status.",
+        "fr": "Batterie, solaire, consommation et réseau d’un onduleur, avec son état.",
+        "de": "Batterie, Solar, Verbrauch und Netz eines Wechselrichters, mit Status.",
+        "es": "Batería, solar, consumo y red de un inversor, con su estado."
+      },
+      "icon": "sun",
+      "settings": [
+        {
+          "key": "device",
+          "type": "select",
+          "source": "devices",
+          "label": {
+            "en": "Inverter",
+            "fr": "Onduleur",
+            "de": "Wechselrichter",
+            "es": "Inversor"
+          }
+        }
+      ],
+      "action_timeout_seconds": 60
+    }
+  ],
+  "scene_triggers": [
+    {
+      "key": "inverter_status_changed",
+      "label": {
+        "en": "Inverter status changed",
+        "fr": "L’état d’un onduleur change",
+        "de": "Status eines Wechselrichters ändert sich",
+        "es": "Cambia el estado de un inversor"
+      },
+      "description": {
+        "en": "DessMonitor reports another status for an inverter: online, offline, fault, warning…",
+        "fr": "DessMonitor signale un autre état pour un onduleur : en ligne, hors ligne, défaut, alerte…",
+        "de": "DessMonitor meldet einen anderen Status für einen Wechselrichter: online, offline, Störung, Warnung…",
+        "es": "DessMonitor indica otro estado para un inversor: en línea, desconectado, avería, aviso…"
+      },
+      "fields": [
+        {
+          "key": "device",
+          "type": "select",
+          "source": "devices",
+          "label": {
+            "en": "Inverter",
+            "fr": "Onduleur",
+            "de": "Wechselrichter",
+            "es": "Inversor"
+          }
+        },
+        {
+          "key": "status",
+          "type": "multi_select",
+          "label": {
+            "en": "New status",
+            "fr": "Nouvel état",
+            "de": "Neuer Status",
+            "es": "Nuevo estado"
+          },
+          "options": [
+            {
+              "value": "online",
+              "label": {
+                "en": "Online",
+                "fr": "En ligne",
+                "de": "Online",
+                "es": "En línea"
+              }
+            },
+            {
+              "value": "offline",
+              "label": {
+                "en": "Offline",
+                "fr": "Hors ligne",
+                "de": "Offline",
+                "es": "Desconectado"
+              }
+            },
+            {
+              "value": "fault",
+              "label": {
+                "en": "Fault",
+                "fr": "Défaut",
+                "de": "Störung",
+                "es": "Avería"
+              }
+            },
+            {
+              "value": "standby",
+              "label": {
+                "en": "Standby",
+                "fr": "En veille",
+                "de": "Standby",
+                "es": "En espera"
+              }
+            },
+            {
+              "value": "warning",
+              "label": {
+                "en": "Warning",
+                "fr": "Alerte",
+                "de": "Warnung",
+                "es": "Aviso"
+              }
+            },
+            {
+              "value": "error",
+              "label": {
+                "en": "Error",
+                "fr": "Erreur",
+                "de": "Fehler",
+                "es": "Error"
+              }
+            },
+            {
+              "value": "protocol_error",
+              "label": {
+                "en": "Protocol error",
+                "fr": "Erreur de protocole",
+                "de": "Protokollfehler",
+                "es": "Error de protocolo"
+              }
+            }
+          ]
+        }
+      ],
+      "variables": [
+        {
+          "key": "status",
+          "type": "string",
+          "label": {
+            "en": "New status",
+            "fr": "Nouvel état",
+            "de": "Neuer Status",
+            "es": "Nuevo estado"
+          }
+        },
+        {
+          "key": "previous_status",
+          "type": "string",
+          "label": {
+            "en": "Previous status",
+            "fr": "État précédent",
+            "de": "Vorheriger Status",
+            "es": "Estado anterior"
+          }
+        }
+      ]
+    },
+    {
+      "key": "operating_mode_changed",
+      "label": {
+        "en": "Operating mode changed",
+        "fr": "Le mode de fonctionnement change",
+        "de": "Betriebsmodus ändert sich",
+        "es": "Cambia el modo de funcionamiento"
+      },
+      "description": {
+        "en": "The inverter switches mode, e.g. from Line (grid) to Battery.",
+        "fr": "L’onduleur change de mode, par exemple de Line (réseau) à Battery (batterie).",
+        "de": "Der Wechselrichter wechselt den Modus, z. B. von Line (Netz) zu Battery (Batterie).",
+        "es": "El inversor cambia de modo, p. ej. de Line (red) a Battery (batería)."
+      },
+      "fields": [
+        {
+          "key": "device",
+          "type": "select",
+          "source": "devices",
+          "label": {
+            "en": "Inverter",
+            "fr": "Onduleur",
+            "de": "Wechselrichter",
+            "es": "Inversor"
+          }
+        }
+      ],
+      "variables": [
+        {
+          "key": "mode",
+          "type": "string",
+          "label": {
+            "en": "New mode",
+            "fr": "Nouveau mode",
+            "de": "Neuer Modus",
+            "es": "Nuevo modo"
+          }
+        },
+        {
+          "key": "previous_mode",
+          "type": "string",
+          "label": {
+            "en": "Previous mode",
+            "fr": "Mode précédent",
+            "de": "Vorheriger Modus",
+            "es": "Modo anterior"
+          }
+        }
+      ]
+    },
+    {
+      "key": "grid_status_changed",
+      "label": {
+        "en": "Grid lost or restored",
+        "fr": "Réseau coupé ou rétabli",
+        "de": "Netz ausgefallen oder zurück",
+        "es": "Red cortada o restablecida"
+      },
+      "description": {
+        "en": "The grid input voltage of the inverter disappears (power cut) or comes back.",
+        "fr": "La tension réseau en entrée de l’onduleur disparaît (coupure de courant) ou revient.",
+        "de": "Die Netzspannung am Eingang des Wechselrichters fällt weg (Stromausfall) oder kommt zurück.",
+        "es": "La tensión de red a la entrada del inversor desaparece (corte de luz) o vuelve."
+      },
+      "fields": [
+        {
+          "key": "device",
+          "type": "select",
+          "source": "devices",
+          "label": {
+            "en": "Inverter",
+            "fr": "Onduleur",
+            "de": "Wechselrichter",
+            "es": "Inversor"
+          }
+        },
+        {
+          "key": "state",
+          "type": "multi_select",
+          "label": {
+            "en": "Grid",
+            "fr": "Réseau",
+            "de": "Netz",
+            "es": "Red"
+          },
+          "options": [
+            {
+              "value": "lost",
+              "label": {
+                "en": "Lost",
+                "fr": "Coupé",
+                "de": "Ausgefallen",
+                "es": "Cortada"
+              }
+            },
+            {
+              "value": "restored",
+              "label": {
+                "en": "Restored",
+                "fr": "Rétabli",
+                "de": "Zurück",
+                "es": "Restablecida"
+              }
+            }
+          ]
+        }
+      ],
+      "variables": [
+        {
+          "key": "state",
+          "type": "string",
+          "label": {
+            "en": "Grid",
+            "fr": "Réseau",
+            "de": "Netz",
+            "es": "Red"
+          }
+        }
+      ]
+    }
+  ],
+  "scene_actions": [
+    {
+      "key": "refresh_inverter",
+      "label": {
+        "en": "Read an inverter now",
+        "fr": "Lire un onduleur maintenant",
+        "de": "Wechselrichter jetzt abfragen",
+        "es": "Leer un inversor ahora"
+      },
+      "description": {
+        "en": "Reads the inverter on DessMonitor now and gives its main values to the next actions.",
+        "fr": "Lit l’onduleur sur DessMonitor maintenant et donne ses valeurs principales aux actions suivantes.",
+        "de": "Liest den Wechselrichter jetzt auf DessMonitor und gibt seine Hauptwerte an die nächsten Aktionen weiter.",
+        "es": "Lee el inversor en DessMonitor ahora y pasa sus valores principales a las acciones siguientes."
+      },
+      "timeout_seconds": 60,
+      "fields": [
+        {
+          "key": "device",
+          "type": "select",
+          "source": "devices",
+          "label": {
+            "en": "Inverter",
+            "fr": "Onduleur",
+            "de": "Wechselrichter",
+            "es": "Inversor"
+          },
+          "required": true
+        }
+      ],
+      "outputs": [
+        {
+          "key": "online",
+          "type": "boolean",
+          "label": {
+            "en": "Online",
+            "fr": "En ligne",
+            "de": "Online",
+            "es": "En línea"
+          }
+        },
+        {
+          "key": "solar_power",
+          "type": "number",
+          "label": {
+            "en": "Solar power (W)",
+            "fr": "Puissance solaire (W)",
+            "de": "Solarleistung (W)",
+            "es": "Potencia solar (W)"
+          }
+        },
+        {
+          "key": "battery_level",
+          "type": "number",
+          "label": {
+            "en": "Battery level (%)",
+            "fr": "Niveau de batterie (%)",
+            "de": "Batteriestand (%)",
+            "es": "Nivel de batería (%)"
+          }
+        },
+        {
+          "key": "load_power",
+          "type": "number",
+          "label": {
+            "en": "Load power (W)",
+            "fr": "Consommation (W)",
+            "de": "Verbrauch (W)",
+            "es": "Consumo (W)"
+          }
+        },
+        {
+          "key": "grid_power",
+          "type": "number",
+          "label": {
+            "en": "Grid power (W)",
+            "fr": "Puissance réseau (W)",
+            "de": "Netzleistung (W)",
+            "es": "Potencia de red (W)"
+          }
+        }
+      ]
+    },
+    {
+      "key": "set_output_priority",
+      "label": {
+        "en": "Set the output priority",
+        "fr": "Changer la priorité de sortie",
+        "de": "Ausgangspriorität setzen",
+        "es": "Cambiar la prioridad de salida"
+      },
+      "description": {
+        "en": "Chooses where the house power comes from first (needs the option in the configuration).",
+        "fr": "Choisit d’où vient d’abord le courant de la maison (option à activer dans la configuration).",
+        "de": "Wählt, woher der Hausstrom zuerst kommt (Option in der Konfiguration nötig).",
+        "es": "Elige de dónde viene primero la electricidad de la casa (opción a activar en la configuración)."
+      },
+      "timeout_seconds": 60,
+      "fields": [
+        {
+          "key": "device",
+          "type": "select",
+          "source": "devices",
+          "label": {
+            "en": "Inverter",
+            "fr": "Onduleur",
+            "de": "Wechselrichter",
+            "es": "Inversor"
+          },
+          "required": true
+        },
+        {
+          "key": "priority",
+          "type": "select",
+          "label": {
+            "en": "Priority",
+            "fr": "Priorité",
+            "de": "Priorität",
+            "es": "Prioridad"
+          },
+          "required": true,
+          "options": [
+            {
+              "value": "sbu",
+              "label": {
+                "en": "Solar, battery, grid (SBU)",
+                "fr": "Solaire, batterie, réseau (SBU)",
+                "de": "Solar, Batterie, Netz (SBU)",
+                "es": "Solar, batería, red (SBU)"
+              }
+            },
+            {
+              "value": "sub",
+              "label": {
+                "en": "Solar, grid, battery (SUB)",
+                "fr": "Solaire, réseau, batterie (SUB)",
+                "de": "Solar, Netz, Batterie (SUB)",
+                "es": "Solar, red, batería (SUB)"
+              }
+            },
+            {
+              "value": "solar",
+              "label": {
+                "en": "Solar first",
+                "fr": "Solaire d’abord",
+                "de": "Solar zuerst",
+                "es": "Solar primero"
+              }
+            },
+            {
+              "value": "utility",
+              "label": {
+                "en": "Grid first",
+                "fr": "Réseau d’abord",
+                "de": "Netz zuerst",
+                "es": "Red primero"
+              }
+            }
+          ]
+        }
+      ],
+      "outputs": [
+        {
+          "key": "sent",
+          "type": "boolean",
+          "label": {
+            "en": "Sent to the inverter",
+            "fr": "Envoyé à l’onduleur",
+            "de": "An den Wechselrichter gesendet",
+            "es": "Enviado al inversor"
+          }
+        }
+      ]
+    },
+    {
+      "key": "set_charger_priority",
+      "label": {
+        "en": "Set the charger priority",
+        "fr": "Changer la priorité de charge",
+        "de": "Ladepriorität setzen",
+        "es": "Cambiar la prioridad de carga"
+      },
+      "description": {
+        "en": "Chooses what charges the battery, e.g. allow the grid during off-peak hours.",
+        "fr": "Choisit ce qui charge la batterie, par exemple autoriser le réseau en heures creuses.",
+        "de": "Wählt, was die Batterie lädt, z. B. das Netz im Niedertarif erlauben.",
+        "es": "Elige qué carga la batería, p. ej. permitir la red en horas valle."
+      },
+      "timeout_seconds": 60,
+      "fields": [
+        {
+          "key": "device",
+          "type": "select",
+          "source": "devices",
+          "label": {
+            "en": "Inverter",
+            "fr": "Onduleur",
+            "de": "Wechselrichter",
+            "es": "Inversor"
+          },
+          "required": true
+        },
+        {
+          "key": "priority",
+          "type": "select",
+          "label": {
+            "en": "Priority",
+            "fr": "Priorité",
+            "de": "Priorität",
+            "es": "Prioridad"
+          },
+          "required": true,
+          "options": [
+            {
+              "value": "solar_first",
+              "label": {
+                "en": "Solar first",
+                "fr": "Solaire d’abord",
+                "de": "Solar zuerst",
+                "es": "Solar primero"
+              }
+            },
+            {
+              "value": "solar_and_utility",
+              "label": {
+                "en": "Solar and grid",
+                "fr": "Solaire et réseau",
+                "de": "Solar und Netz",
+                "es": "Solar y red"
+              }
+            },
+            {
+              "value": "solar_only",
+              "label": {
+                "en": "Solar only",
+                "fr": "Solaire uniquement",
+                "de": "Nur Solar",
+                "es": "Solo solar"
+              }
+            },
+            {
+              "value": "utility_first",
+              "label": {
+                "en": "Grid first",
+                "fr": "Réseau d’abord",
+                "de": "Netz zuerst",
+                "es": "Red primero"
+              }
+            }
+          ]
+        }
+      ],
+      "outputs": [
+        {
+          "key": "sent",
+          "type": "boolean",
+          "label": {
+            "en": "Sent to the inverter",
+            "fr": "Envoyé à l’onduleur",
+            "de": "An den Wechselrichter gesendet",
+            "es": "Enviado al inversor"
+          }
+        }
+      ]
+    }
+  ]
+}
